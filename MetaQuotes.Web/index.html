@@ -1,0 +1,32 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title></title>
+    <script src="/Scripts/angular.min.js"></script>
+    <script src="/Scripts/Local/app.js"></script>
+    <script src="/Scripts/Local/mainController.js"></script>
+</head>
+    <body ng-app="MetaQuotesApp">
+        <div ng-controller="MainController">
+            <div>
+                <button type="button" ng-click="showSearchByCity">Искать по городу</button>
+                <button type="button" ng-click="showSearchByIp">Искать по городу</button>
+            </div>
+            <div>
+                <div ng-show="searchByCityVisible">
+                    <input ng-model="searchText" placeholder="Укажите город для поиска" />
+                    <button type="button" ng-click="searchByCity()">Искать</button>  
+                    <div ng-model="searchResult">
+
+                    </div> 
+                </div>
+                <div ng-show="searchByIpVisible">
+                    
+                    <button type="button" ng-click="searchByCity">Искать</button>
+                </div>
+            </div>
+        </div>
+       
+    </body>
+</html>
