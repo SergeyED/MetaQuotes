@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Runtime.InteropServices;
 
 namespace MetaQuotes.Services
@@ -11,6 +12,17 @@ namespace MetaQuotes.Services
             GCHandle handle = GCHandle.Alloc(rawData, GCHandleType.Pinned);
             var returnObject = (T)Marshal.PtrToStructure(handle.AddrOfPinnedObject(), typeof(T));
             handle.Free();
+            return returnObject;
+        }
+
+        public static T ReadStruct<T>(this byte[] bytes, int offset) where T : struct
+        {
+            IntPtr ptr = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(T)));
+
+            Marshal.Copy(bytes, offset, ptr, Marshal.SizeOf(typeof(T)));
+            var returnObject = (T)Marshal.PtrToStructure(ptr, typeof(T));
+            Marshal.FreeHGlobal(ptr);
+            
             return returnObject;
         }
     }

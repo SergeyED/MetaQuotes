@@ -44,7 +44,7 @@ namespace TestApp2.Controllers
                 var rangeIPStrings = new StringBuilder();
                 foreach (var item in db.Ranges)
                 {
-                    var text = string.Format("{0}: {1} - {2}", item.location_index, IpAddressHelpers.IpUintToString(item.ip_from), IpAddressHelpers.IpUintToString(item.ip_to));
+                    var text = string.Format("{0}: {1} - {2}", item.LocationIndex, IpAddressHelpers.IpUintToString(item.IpFrom), IpAddressHelpers.IpUintToString(item.IpTo));
                     rangeIPStrings.AppendLine(text);
                 }
 

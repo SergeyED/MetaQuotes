@@ -2,48 +2,42 @@
 
 namespace MetaQuotes.Models
 {
-    [StructLayout(LayoutKind.Sequential, Size = Constants.LocationsSize)]
-    public struct City
+    public class City
     {
         /// <summary>
         /// название страны (случайная строка с префиксом "cou_")
         /// </summary>
-        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 8)]
-        public string country;      
+        public string Country { get; set; }      
 
         /// <summary>
         /// название области (случайная строка с префиксом "reg_")
         /// </summary>
-        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 12)]
-        public string region;        
+        public string Region { get; set; }        
 
         /// <summary>
         /// почтовый индекс (случайная строка с префиксом "pos_")
         /// </summary>
-        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 12)]
-        public string postal;       
+        public string Postal { get; set; }       
 
         /// <summary>
         /// название города (случайная строка с префиксом "cit_")
         /// </summary>
-        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 24)]
-        public string city;       
+        public string CityName { get; set; }       
 
         /// <summary>
         /// название организации (случайная строка с префиксом "org_")
         /// </summary>
-        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 32)]
-        public string organization; 
+        public string Organization { get; set; }
 
         /// <summary>
         /// широта
         /// </summary>
-        public float latitude;
+        public float Latitude { get; set; }
 
         /// <summary>
         /// долгота
         /// </summary>
-        public float longitude; 
+        public float Longitude { get; set; } 
 
     }
 

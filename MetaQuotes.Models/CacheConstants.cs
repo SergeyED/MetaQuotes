@@ -1,5 +1,4 @@
-﻿using System;
-namespace TestApp2
+﻿namespace MetaQuotes.Models
 {
     public static class CacheConstants
     {

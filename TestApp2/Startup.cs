@@ -52,7 +52,7 @@ namespace TestApp2
             if (!memoryCache.TryGetValue(CacheConstants.GeoBaseKey, out db))
             {
                 var loader = new BinaryLoader();
-                db = loader.LoadDb("/Documents/geobase.dat");
+                db = loader.LoadDb(@"D:\Work\geobase3.dat");
 
                 var cacheEntryOptions = new MemoryCacheEntryOptions().SetPriority(CacheItemPriority.NeverRemove);
                 memoryCache.Set(CacheConstants.GeoBaseKey, db, cacheEntryOptions);

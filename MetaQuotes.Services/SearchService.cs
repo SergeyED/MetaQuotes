@@ -2,7 +2,6 @@
 using MetaQuotes.Models;
 using MetaQuotes.Services.Common;
 using Microsoft.Extensions.Caching.Memory;
-using TestApp2;
 using System.Linq;
 using System.Collections.Generic;
 namespace MetaQuotes.Services
@@ -20,7 +19,7 @@ namespace MetaQuotes.Services
         {
             if (memoryCache.TryGetValue(CacheConstants.GeoBaseKey, out GeoBase db))
             {
-                var cities = db.Cities.Where(x => x.city == city).ToList();
+                var cities = db.Cities.Where(x => x.CityName == city).ToList();
                 return cities;
             }
 
@@ -33,15 +32,15 @@ namespace MetaQuotes.Services
 
             if (memoryCache.TryGetValue(CacheConstants.GeoBaseKey, out GeoBase db))
             {
-                var ipAddresses = db.Ranges.Where(x => intAddress >= x.ip_from && intAddress <= x.ip_to);
+                var ipAddresses = db.Ranges.Where(x => intAddress >= x.IpFrom && intAddress <= x.IpTo);
                 if (ipAddresses.Any())
                 {
                     var result = new List<City>();
                     foreach (var ipAddress in ipAddresses)
                     {
-                        if (db.Cities.Length > ipAddress.location_index)
+                        if (db.Cities.Length > ipAddress.LocationIndex)
                         {
-                            var city = db.Cities[ipAddress.location_index];
+                            var city = db.Cities[ipAddress.LocationIndex];
                             result.Add(city);
                         }
                     }

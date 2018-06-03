@@ -1,9 +1,9 @@
 ﻿using System;
 namespace MetaQuotes.Services.Exceptions
 {
-    public class ConvertBinaryToStructException : Exception
+    public class ConvertBinaryToClassException : Exception
     {
-        public ConvertBinaryToStructException(string message) : base(message)
+        public ConvertBinaryToClassException(string message, Exception exception) : base(message, exception)
         {
         }
     }

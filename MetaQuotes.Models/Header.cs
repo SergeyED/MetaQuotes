@@ -2,38 +2,41 @@
 
 namespace MetaQuotes.Models
 {
-    [StructLayout(LayoutKind.Sequential, Size = Constants.HeaderSize)]
-    public struct Header
+    public class Header
     {
         /// <summary>
         /// версия база данных
         /// </summary>
-        public int version; 
+        public int Version { get; set; }
+       
         /// <summary>
         /// название/префикс для базы данных
         /// </summary>
-        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 32)]
-        public string name;
+        public string Name { get; set; }
+        
         /// <summary>
         /// время создания базы данных
         /// </summary>
-        public ulong timestamp;
+        public ulong Timestamp { get; set; }
+        
         /// <summary>
         /// общее количество записей
         /// </summary>
-        public int records;
+        public int Records { get; set; }
+        
         /// <summary>
         /// смещение относительно начала файла до начала списка записей с геоинформацией.
         /// </summary>
-        public uint offset_ranges;
+        public uint OffsetRanges { get; set; }
+        
         /// <summary>
         /// смещение относительно начала файла до начала индекса с сортировкой по названию городов
         /// </summary>
-        public uint offset_cities;
+        public uint OffsetCities { get; set; }
+        
         /// <summary>
         /// смещение относительно начала файла до начала списка записей о местоположении
         /// </summary>
-        public uint offset_locations;
-
+        public uint OffsetLocations { get; set; }
     }
 }

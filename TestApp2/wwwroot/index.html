@@ -1,10 +1,133 @@
 ﻿<!DOCTYPE html>
 <html>
-    <head>
-        <meta charset="utf-8" />
-        <title>Hellos</title>
-    </head>
-    <body>
-        Ping...s
-    </body>
+<head>
+    <meta charset="utf-8" />
+    <title>MetaQuotes Test App</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" integrity="sha384-WskhaSGFgHYWDcbwN70/dfYBj47jz9qbsMId/iRN3ewGhXQFZCSftd1LZCfmhktB" crossorigin="anonymous">
+
+</head>
+<body>
+
+    <script type="text/javascript">
+        var xhr = new XMLHttpRequest();
+
+        function searchByIpClick() {
+            var ip = document.getElementById("ipAddressInput").value;
+
+            xhr.open('GET', '/ip/location?ip=' + ip, true);
+            xhr.send();
+
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState != 4) return;
+
+                if (xhr.status != 200) {
+                    alert('Ошибка ' + xhr.status + ': ' + xhr.statusText);
+                } else {
+                    var response = JSON.parse(xhr.responseText);
+                    showResult(response);
+                }
+            }
+        }
+
+        function searchByCityClick() {
+            var cityName = document.getElementById("cityNameInput").value;
+
+            xhr.open('GET', '/city/locations?city=' + cityName, true);
+            xhr.send();
+
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState != 4) return;
+
+                if (xhr.status != 200) {
+                    alert('Ошибка ' + xhr.status + ': ' + xhr.statusText);
+                } else {
+                    var response = JSON.parse(xhr.responseText);
+                    showResult(response);
+                }
+            }
+        }
+
+        function showResult(response) {
+           
+            if (response.length > 0) {
+                document.getElementById("resultBlock").style.display = "block";
+                document.getElementsByName("country")[0].innerHTML += response[0].country;
+                document.getElementsByName("region")[0].innerHTML += response[0].region;
+                document.getElementsByName("postal")[0].innerHTML += response[0].postal;
+                document.getElementsByName("cityName")[0].innerHTML += response[0].cityName;
+                document.getElementsByName("organization")[0].innerHTML += response[0].organization;
+                document.getElementsByName("latitude")[0].innerHTML += response[0].latitude;
+                document.getElementsByName("longitude")[0].innerHTML += response[0].longitude;
+
+            }
+        }
+
+        function openSearchByIpBlock() {
+            document.getElementById("resultBlock").style.display = "none";
+            document.getElementById("searchByIpBlock").style.display = "block";
+            document.getElementById("searchByNameBlock").style.display = "none";
+        }
+
+        function openSearchByCityBlock() {
+            document.getElementById("resultBlock").style.display = "none";
+            document.getElementById("searchByIpBlock").style.display = "none";
+            document.getElementById("searchByNameBlock").style.display = "block";
+        }
+    </script>
+
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-4">
+                <button class="btn" onclick="openSearchByIpBlock()">Поиск по IP</button><br />
+                <button class="btn" onclick="openSearchByCityBlock()">Поиск по городу</button>
+            </div>
+            <div class="col-sm-8">
+                <div id="searchByIpBlock" style="display: none;">
+                    <div class="card">
+                        <div class="card-header">
+                            Поиск по IP
+                        </div>
+                        <div class="card-block">
+                            <h4 class="card-title">Укажите IP адрес для поиска:</h4>
+                            <p class="card-text"><input type="text" id="ipAddressInput" placeholder="Введите IP адрес" /></p>
+                            <button type="button" onclick="searchByIpClick()" class="btn btn-primary">Искать</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="searchByNameBlock" style="display: none;">
+                    <div class="card">
+                        <div class="card-header">
+                            Поиск по городу
+                        </div>
+                        <div class="card-block">
+                            <h4 class="card-title">Укажите город для поиска:</h4>
+                            <p class="card-text"><input type="text" id="cityNameInput" placeholder="Введите город" /></p>
+                            <button type="button" onclick="searchByCityClick()" class="btn btn-primary">Искать</button>
+                        </div>
+                    </div>
+                </div>
+                <hr />
+                <div id="resultBlock" style="display: none;">
+                    <div class="card">
+                        <div class="card-header">
+                            Результаты поиска
+                        </div>
+                        <div>
+                            <ul class="list-group" name="resultItem">
+                                <li class="list-group-item" name="country">Country: </li>
+                                <li class="list-group-item" name="region">Region: </li>
+                                <li class="list-group-item" name="postal">Postal: </li>
+                                <li class="list-group-item" name="cityName">City: </li>
+                                <li class="list-group-item" name="organization">Organization: </li>
+                                <li class="list-group-item" name="latitude">Latitude: </li>
+                                <li class="list-group-item" name="longitude">Longitude: </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
 </html>

@@ -1,12 +1,7 @@
-﻿using System.Runtime.InteropServices;
-
-namespace MetaQuotes.Models
+﻿namespace MetaQuotes.Models
 {
-    [StructLayout(LayoutKind.Sequential, Size = Constants.IndexesSize)]
-    public struct Location
+    public class Location
     {
-        public uint index;
+        public uint Index { get; set; }
     }
-
-
 }

@@ -1,22 +1,12 @@
-﻿namespace MetaQuotes.Models
+﻿using System.Runtime.InteropServices;
+
+namespace MetaQuotes.Models
 {
-    public struct IPRange
+    public class IpRange
     {
-        /// <summary>
-        /// начало диапазона IP адресов
-        /// </summary>
-        public uint ip_from;
-
-        /// <summary>
-        /// индекс записи о местоположении
-        /// </summary>
-        public uint location_index;
-
-        /// <summary>
-        /// конец диапазона IP адресов
-        /// </summary>
-        public uint ip_to;
+        public uint IpFrom { get; set; }
+        public uint IpTo { get; set; }
+        public uint LocationIndex { get; set; }
     }
-
 
 }
