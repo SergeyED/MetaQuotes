@@ -39,20 +39,7 @@ namespace MetaQuotes.WebApp
 
             _memoryCache = cache;
             app.UseResponseCaching();
-
-            //app.Use(async (context, next) =>
-            //{
-            //    context.Response.GetTypedHeaders().CacheControl = new CacheControlHeaderValue()
-            //    {
-            //        Public = true,
-            //        MaxAge = TimeSpan.FromSeconds(60)
-            //    };
-            //    context.Response.Headers[HeaderNames.Vary] = new string[] { "Accept-Encoding" };
-
-            //    await next();
-            //});
-
-
+            
             app.UseMvc();
             app.UseStaticFiles();
 
