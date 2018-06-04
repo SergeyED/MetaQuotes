@@ -18,7 +18,7 @@ namespace MetaQuotes.Services.Common
                 ip += (uint)ipBytes[3];
                 return ip;
             }
-            throw new IPAddressConvertToUIntException($"Ошибка при конвертировании IP: {ipString} в UInt");
+            throw new IpAddressConvertToUIntException($"Ошибка при конвертировании IP: {ipString} в UInt");
         }
 
         public static string IpUintToString(uint ipUint)
@@ -34,7 +34,7 @@ namespace MetaQuotes.Services.Common
 
                 return new IPAddress(ipBytesRevert).ToString();
             } catch (Exception exception){
-                throw new UIntIPAddressConvertStringException($"Ошибка при конвертировании UInt: {ipUint} в IP", exception);
+                throw new UIntIpAddressConvertStringException($"Ошибка при конвертировании UInt: {ipUint} в IP", exception);
             }
         }
     }

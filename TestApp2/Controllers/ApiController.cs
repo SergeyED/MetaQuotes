@@ -20,6 +20,7 @@ namespace TestApp2.Controllers
 
         [HttpGet]
         [Route("ip/location")]
+        [ResponseCache(VaryByQueryKeys = new[] { "ip" }, Duration = 86400)] //Кеш на 1 день
         public JsonResult GetByIp(string ip)
         {
             var response = _searchService.SearchByIpAddress(ip);
@@ -28,11 +29,27 @@ namespace TestApp2.Controllers
 
         [HttpGet]
         [Route("city/locations")]
+        [ResponseCache(VaryByQueryKeys = new[] { "city" }, Duration = 86400)] //кеш на 1 день
         public JsonResult GetByCity(string city)
         {
             var response = _searchService.SearchByCityName(city);
             return Json(response);
         }
+
+        [HttpGet]
+        [Route("api/stat")]
+        public JsonResult GetStat()
+        {
+            GeoBase db;
+            if (_memoryCache.TryGetValue(CacheConstants.GeoBaseKey, out db))
+            {
+                var response = db.LoadStatistic;
+                return Json(response);
+            }
+
+            return Json(null);
+        }
+
 
         [HttpGet]
         [Route("api/checkip")]

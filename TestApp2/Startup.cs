@@ -1,12 +1,12 @@
-﻿using MetaQuotes.Services;
+﻿using MetaQuotes.Models;
+using MetaQuotes.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using MetaQuotes.Models;
 
-namespace TestApp2
+namespace MetaQuotes.WebApp
 {
     public class Startup
     {
@@ -16,18 +16,17 @@ namespace TestApp2
         }
 
         public IConfiguration Configuration { get; }
-        IMemoryCache memoryCache;
+        private IMemoryCache _memoryCache;
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddMemoryCache();
+            services.AddResponseCaching();
             services.AddRouting();
             services.AddMvc();
 
             services.AddScoped<ISearchService, SearchService>();
-
-
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -38,7 +37,21 @@ namespace TestApp2
                 app.UseDeveloperExceptionPage();
             }
 
-            memoryCache = cache;
+            _memoryCache = cache;
+            app.UseResponseCaching();
+
+            //app.Use(async (context, next) =>
+            //{
+            //    context.Response.GetTypedHeaders().CacheControl = new CacheControlHeaderValue()
+            //    {
+            //        Public = true,
+            //        MaxAge = TimeSpan.FromSeconds(60)
+            //    };
+            //    context.Response.Headers[HeaderNames.Vary] = new string[] { "Accept-Encoding" };
+
+            //    await next();
+            //});
+
 
             app.UseMvc();
             app.UseStaticFiles();
@@ -49,13 +62,13 @@ namespace TestApp2
         public void LoadGeoBase(){
             var db = new GeoBase();
 
-            if (!memoryCache.TryGetValue(CacheConstants.GeoBaseKey, out db))
+            if (!_memoryCache.TryGetValue(CacheConstants.GeoBaseKey, out db))
             {
                 var loader = new BinaryLoader();
                 db = loader.LoadDb(@"D:\Work\geobase3.dat");
 
                 var cacheEntryOptions = new MemoryCacheEntryOptions().SetPriority(CacheItemPriority.NeverRemove);
-                memoryCache.Set(CacheConstants.GeoBaseKey, db, cacheEntryOptions);
+                _memoryCache.Set(CacheConstants.GeoBaseKey, db, cacheEntryOptions);
             }
         }
     }

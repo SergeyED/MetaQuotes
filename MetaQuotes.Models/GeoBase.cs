@@ -15,7 +15,6 @@
         public GeoBase()
         {
             LoadStatistic = new BaseLoadStatistic();
-            
         }
     }
 }

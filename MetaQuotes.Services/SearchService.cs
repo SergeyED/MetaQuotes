@@ -1,5 +1,4 @@
-﻿using System;
-using MetaQuotes.Models;
+﻿using MetaQuotes.Models;
 using MetaQuotes.Services.Common;
 using Microsoft.Extensions.Caching.Memory;
 using System.Linq;
@@ -8,47 +7,87 @@ namespace MetaQuotes.Services
 {
     public class SearchService : ISearchService
     {
-        readonly IMemoryCache memoryCache;
+        private readonly IMemoryCache _memoryCache;
 
-        public SearchService(IMemoryCache cache)
+        public SearchService(IMemoryCache memoryCache)
         {
-            memoryCache = cache;
+            _memoryCache = memoryCache;
         }
 
         public List<City> SearchByCityName(string city)
         {
-            if (memoryCache.TryGetValue(CacheConstants.GeoBaseKey, out GeoBase db))
+            if (TryGetSearchResultFromCache(CacheConstants.SearchByCityCacheName(city), out var resultFromCache))
             {
-                var cities = db.Cities.Where(x => x.CityName == city).ToList();
+                return resultFromCache;
+            }
+
+            if (!_memoryCache.TryGetValue(CacheConstants.GeoBaseKey, out GeoBase db)) return null;
+
+            var cities = db.Cities.Where(x => x.CityName == city).ToList();
+
+            SetSearchResultToCache(CacheConstants.SearchByCityCacheName(city), cities);
+
+            return cities;
+
+        }
+
+        public List<City> SearchByIpAddress(string ip)
+        {
+            if (TryGetSearchResultFromCache(CacheConstants.SearchByIpCacheName(ip), out var resultFromCache))
+            {
+                return resultFromCache;
+            }
+
+            var intAddress = IpAddressHelpers.IpToUint(ip);
+
+            if (!_memoryCache.TryGetValue(CacheConstants.GeoBaseKey, out GeoBase db)) return null;
+
+            var ipAddresses = db.Ranges.Where(x => intAddress >= x.IpFrom && intAddress <= x.IpTo).ToList();
+            if (ipAddresses.Any())
+            {
+                var cities = new List<City>();
+                foreach (var ipAddress in ipAddresses)
+                {
+                    if (db.Cities.Length > ipAddress.LocationIndex)
+                    {
+                        var city = db.Cities[ipAddress.LocationIndex];
+                        cities.Add(city);
+                    }
+                }
+
+                SetSearchResultToCache(CacheConstants.SearchByIpCacheName(ip), cities);
+
                 return cities;
             }
 
             return null;
         }
 
-        public List<City> SearchByIpAddress(string ip)
+        /// <summary>
+        /// Пытаемся достать результаты поиска из кеша
+        /// </summary>
+        /// <param name="cacheName">Имя кеша генерируется при помощи статичного класса CacheConstants</param>
+        /// <param name="result"></param>
+        /// <returns></returns>
+        private bool TryGetSearchResultFromCache(string cacheName, out List<City> result)
         {
-            var intAddress = IpAddressHelpers.IpToUint(ip);
-
-            if (memoryCache.TryGetValue(CacheConstants.GeoBaseKey, out GeoBase db))
+            if (_memoryCache.TryGetValue(cacheName, out result))
             {
-                var ipAddresses = db.Ranges.Where(x => intAddress >= x.IpFrom && intAddress <= x.IpTo);
-                if (ipAddresses.Any())
-                {
-                    var result = new List<City>();
-                    foreach (var ipAddress in ipAddresses)
-                    {
-                        if (db.Cities.Length > ipAddress.LocationIndex)
-                        {
-                            var city = db.Cities[ipAddress.LocationIndex];
-                            result.Add(city);
-                        }
-                    }
-                    return result;
-                }
+                return true;
             }
 
-            return null;
+            return false;
+        }
+
+        /// <summary>
+        /// Добавить результат поика в вечный кеш
+        /// </summary>
+        /// <param name="cacheName">Имя кеша генерируется при помощи статичного класса CacheConstants</param>
+        /// <param name="result"></param>
+        private void SetSearchResultToCache(string cacheName, List<City> result)
+        {
+            var cacheEntryOptions = new MemoryCacheEntryOptions().SetPriority(CacheItemPriority.NeverRemove);
+            _memoryCache.Set(cacheName, result, cacheEntryOptions);
         }
     }
 }

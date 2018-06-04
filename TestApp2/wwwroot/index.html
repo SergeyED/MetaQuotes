@@ -10,9 +10,28 @@
 
     <script type="text/javascript">
         var xhr = new XMLHttpRequest();
+        getDbLoadStat();
+
+        function getDbLoadStat() {
+            xhr.open('GET', '/api/stat', true);
+            xhr.send();
+
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState != 4) return;
+
+                if (xhr.status != 200) {
+                    alert('Ошибка ' + xhr.status + ': ' + xhr.statusText);
+                } else {
+                    var response = JSON.parse(xhr.responseText);
+                    document.getElementById("dbLoadTime").innerText += response.loadDbFromDiskTime;
+                    document.getElementById("dbCobvertToObjectsTime").innerText += response.convertBytesToObjectsTime;
+                }
+            }
+        }
 
         function searchByIpClick() {
             var ip = document.getElementById("ipAddressInput").value;
+            if (!ip) return;
 
             xhr.open('GET', '/ip/location?ip=' + ip, true);
             xhr.send();
@@ -31,6 +50,7 @@
 
         function searchByCityClick() {
             var cityName = document.getElementById("cityNameInput").value;
+            if (!cityName) return;
 
             xhr.open('GET', '/city/locations?city=' + cityName, true);
             xhr.send();
@@ -48,17 +68,27 @@
         }
 
         function showResult(response) {
-           
-            if (response.length > 0) {
-                document.getElementById("resultBlock").style.display = "block";
-                document.getElementsByName("country")[0].innerHTML += response[0].country;
-                document.getElementsByName("region")[0].innerHTML += response[0].region;
-                document.getElementsByName("postal")[0].innerHTML += response[0].postal;
-                document.getElementsByName("cityName")[0].innerHTML += response[0].cityName;
-                document.getElementsByName("organization")[0].innerHTML += response[0].organization;
-                document.getElementsByName("latitude")[0].innerHTML += response[0].latitude;
-                document.getElementsByName("longitude")[0].innerHTML += response[0].longitude;
 
+            if (response.length > 0) {
+                document.getElementById("nothingFound").style.display = "none";
+                document.getElementById("resultBlock").style.display = "block";
+                document.getElementsByName("country")[0].innerHTML = response[0].country;
+                document.getElementsByName("region")[0].innerHTML = response[0].region;
+                document.getElementsByName("postal")[0].innerHTML = response[0].postal;
+                document.getElementsByName("cityName")[0].innerHTML = response[0].cityName;
+                document.getElementsByName("organization")[0].innerHTML = response[0].organization;
+                document.getElementsByName("latitude")[0].innerHTML = response[0].latitude;
+                document.getElementsByName("longitude")[0].innerHTML = response[0].longitude;
+            } else {
+                document.getElementById("nothingFound").style.display = "block";
+                document.getElementById("resultBlock").style.display = "none";
+                document.getElementsByName("country")[0].innerHTML = '';
+                document.getElementsByName("region")[0].innerHTML = '';
+                document.getElementsByName("postal")[0].innerHTML ='';
+                document.getElementsByName("cityName")[0].innerHTML = '';
+                document.getElementsByName("organization")[0].innerHTML = '';
+                document.getElementsByName("latitude")[0].innerHTML = '';
+                document.getElementsByName("longitude")[0].innerHTML = '';
             }
         }
 
@@ -77,9 +107,19 @@
 
     <div class="container">
         <div class="row">
+            <div class="col-sm-12">
+                <h2>MetaQuotes Test App</h2>
+            </div>
             <div class="col-sm-4">
-                <button class="btn" onclick="openSearchByIpBlock()">Поиск по IP</button><br />
-                <button class="btn" onclick="openSearchByCityBlock()">Поиск по городу</button>
+                <div class="btn-group-vertical mb-2">
+                    <button class="btn" onclick="openSearchByIpBlock()">Поиск по IP</button>
+                    <button class="btn" onclick="openSearchByCityBlock()">Поиск по городу</button>
+                </div>
+                <div class="alert alert-success" role="alert">
+                    <p>Загрузка базы: <span id="dbLoadTime"></span></p>
+                    <p>Конвертирование объектов: <span id="dbCobvertToObjectsTime"></span></p>
+                </div>
+
             </div>
             <div class="col-sm-8">
                 <div id="searchByIpBlock" style="display: none;">
@@ -87,7 +127,7 @@
                         <div class="card-header">
                             Поиск по IP
                         </div>
-                        <div class="card-block">
+                        <div class="card-block p-3">
                             <h4 class="card-title">Укажите IP адрес для поиска:</h4>
                             <p class="card-text"><input type="text" id="ipAddressInput" placeholder="Введите IP адрес" /></p>
                             <button type="button" onclick="searchByIpClick()" class="btn btn-primary">Искать</button>
@@ -100,34 +140,45 @@
                         <div class="card-header">
                             Поиск по городу
                         </div>
-                        <div class="card-block">
+                        <div class="card-block p-3">
                             <h4 class="card-title">Укажите город для поиска:</h4>
                             <p class="card-text"><input type="text" id="cityNameInput" placeholder="Введите город" /></p>
                             <button type="button" onclick="searchByCityClick()" class="btn btn-primary">Искать</button>
                         </div>
                     </div>
                 </div>
-                <hr />
-                <div id="resultBlock" style="display: none;">
+                <div class="alert alert-danger mt-2" role="alert" style="display: none" id="nothingFound">
+                    <strong>Очень жаль!</strong> Но ничего не найдено.
+                </div>
+                <div id="resultBlock" class="pt-2" style="display: none;">
                     <div class="card">
                         <div class="card-header">
                             Результаты поиска
                         </div>
                         <div>
-                            <ul class="list-group" name="resultItem">
-                                <li class="list-group-item" name="country">Country: </li>
-                                <li class="list-group-item" name="region">Region: </li>
-                                <li class="list-group-item" name="postal">Postal: </li>
-                                <li class="list-group-item" name="cityName">City: </li>
-                                <li class="list-group-item" name="organization">Organization: </li>
-                                <li class="list-group-item" name="latitude">Latitude: </li>
-                                <li class="list-group-item" name="longitude">Longitude: </li>
-                            </ul>
+                            <dl class="row p-3">
+                                <dt class="col-sm-3">Country: </dt>
+                                <dd class="col-sm-9" name="country"></dd>
+                                <dt class="col-sm-3">Region: </dt>
+                                <dd class="col-sm-9" name="region"></dd>
+                                <dt class="col-sm-3">Postal: </dt>
+                                <dd class="col-sm-9" name="postal"></dd>
+                                <dt class="col-sm-3">City: </dt>
+                                <dd class="col-sm-9" name="cityName"></dd>
+                                <dt class="col-sm-3">Organization: </dt>
+                                <dd class="col-sm-9" name="organization"></dd>
+                                <dt class="col-sm-3">Latitude: </dt>
+                                <dd class="col-sm-9" name="latitude"></dd>
+                                <dt class="col-sm-3">Longitude: </dt>
+                                <dd class="col-sm-9" name="longitude"></dd>
+                            </dl>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
+
+        
     </div>
 </body>
 </html>

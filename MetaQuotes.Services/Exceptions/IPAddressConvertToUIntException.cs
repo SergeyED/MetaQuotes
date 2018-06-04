@@ -1,9 +1,9 @@
 ﻿using System;
 namespace MetaQuotes.Services.Exceptions
 {
-    public class IPAddressConvertToUIntException : Exception
+    public class IpAddressConvertToUIntException : Exception
     {
-        public IPAddressConvertToUIntException(string message) : base(message)
+        public IpAddressConvertToUIntException(string message) : base(message)
         {
         }
     }
