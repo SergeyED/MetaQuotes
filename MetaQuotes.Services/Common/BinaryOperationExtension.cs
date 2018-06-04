@@ -2,19 +2,18 @@
 using System.IO;
 using System.Runtime.InteropServices;
 
-namespace MetaQuotes.Services
+namespace MetaQuotes.Services.Common
 {
     public static class BinaryOperationExtension
     {
-        public static T ReadStruct<T>(this BinaryReader reader) where T : struct
-        {
-            byte[] rawData = reader.ReadBytes(Marshal.SizeOf(typeof(T)));
-            GCHandle handle = GCHandle.Alloc(rawData, GCHandleType.Pinned);
-            var returnObject = (T)Marshal.PtrToStructure(handle.AddrOfPinnedObject(), typeof(T));
-            handle.Free();
-            return returnObject;
-        }
-
+        /// <summary>
+        /// Данный метод может использоваться для конвертирования массива байт в структуру. 
+        /// Использовал его изначально, но при тестах он давал не очень хорошие результаты.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="bytes"></param>
+        /// <param name="offset"></param>
+        /// <returns></returns>
         public static T ReadStruct<T>(this byte[] bytes, int offset) where T : struct
         {
             IntPtr ptr = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(T)));

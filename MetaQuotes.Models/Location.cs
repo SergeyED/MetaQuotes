@@ -2,6 +2,11 @@
 {
     public class Location
     {
-        public uint Index { get; set; }
+        public Location(uint index)
+        {
+            Index = index;
+        }
+
+        public uint Index { get; }
     }
 }

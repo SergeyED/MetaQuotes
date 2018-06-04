@@ -81,61 +81,65 @@ namespace MetaQuotes.Services
         }
 
         private Header ConvertToHeader(byte[] file, int offset)
-        {
-            var header = new Header();
-            header.Version = BitConverter.ToInt32(file, offset);
+        {   
+            var version = BitConverter.ToInt32(file, offset);
             offset += 4;
-            header.Name = new string(Encoding.Default.GetChars(file, offset, 32)).TrimEnd('\0');
+            var name = new string(Encoding.Default.GetChars(file, offset, 32)).TrimEnd('\0');
             offset += 32;
-            header.Timestamp = BitConverter.ToUInt64(file, offset);
+            var timestamp = BitConverter.ToUInt64(file, offset);
             offset += 8;
-            header.Records = BitConverter.ToInt32(file, offset);
+            var records = BitConverter.ToInt32(file, offset);
             offset += 4;
-            header.OffsetRanges = BitConverter.ToUInt32(file, offset);
+            var offsetRanges = BitConverter.ToUInt32(file, offset);
             offset += 4;
-            header.OffsetCities = BitConverter.ToUInt32(file, offset);
+            var offsetCities = BitConverter.ToUInt32(file, offset);
             offset += 4;
-            header.OffsetLocations = BitConverter.ToUInt32(file, offset);
+            var offsetLocations = BitConverter.ToUInt32(file, offset);
+
+            var header = new Header(version, name, timestamp, records, offsetRanges, offsetCities, offsetLocations);
 
             return header;
         }
 
         private IpRange ConvertToIpRange(byte[] file, int offset)
         {
-            var IpRange = new IpRange();
-            IpRange.IpFrom = BitConverter.ToUInt32(file, offset);
+            var ipFrom = BitConverter.ToUInt32(file, offset);
             offset += 4;
-            IpRange.IpTo = BitConverter.ToUInt32(file, offset);
+            var ipTo = BitConverter.ToUInt32(file, offset);
             offset += 4;
-            IpRange.LocationIndex = BitConverter.ToUInt32(file, offset);
+            var locationIndex = BitConverter.ToUInt32(file, offset);
 
-            return IpRange;
+            var ipRange = new IpRange(ipFrom, ipTo, locationIndex);
+
+            return ipRange;
         }
 
         private City ConvertToCity(byte[] file, int offset)
         {
-            var city = new City();
-            city.Country = Encoding.Default.GetString(file, offset, 8).TrimEnd('\0');
+            var country = Encoding.Default.GetString(file, offset, 8).TrimEnd('\0');
             offset += 8;
-            city.Region = Encoding.Default.GetString(file, offset, 12).TrimEnd('\0');
+            var region = Encoding.Default.GetString(file, offset, 12).TrimEnd('\0');
             offset += 12;
-            city.Postal = Encoding.Default.GetString(file, offset, 8).TrimEnd('\0');
+            var postal = Encoding.Default.GetString(file, offset, 8).TrimEnd('\0');
             offset += 12;
-            city.CityName = Encoding.Default.GetString(file, offset, 24).TrimEnd('\0');
+            var cityName = Encoding.Default.GetString(file, offset, 24).TrimEnd('\0');
             offset += 24;
-            city.Organization = Encoding.Default.GetString(file, offset, 32).TrimEnd('\0');
+            var organization = Encoding.Default.GetString(file, offset, 32).TrimEnd('\0');
             offset += 32;
-            city.Latitude = BitConverter.ToSingle(file, offset);
+            var latitude = BitConverter.ToSingle(file, offset);
             offset += 4;
-            city.Longitude = BitConverter.ToSingle(file, offset);
+            var longitude = BitConverter.ToSingle(file, offset);
+
+            var city = new City(country, region, postal, cityName, organization, latitude, longitude);
 
             return city;
         }
 
         private Location ConvertToLocation(byte[] file, int offset)
         {
-            var location = new Location();
-            location.Index = BitConverter.ToUInt32(file, offset);
+            var index = BitConverter.ToUInt32(file, offset);
+
+            var location = new Location(index);
 
             return location;
         }
