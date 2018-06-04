@@ -43,7 +43,11 @@ namespace TestApp2.Controllers
             GeoBase db;
             if (_memoryCache.TryGetValue(CacheConstants.GeoBaseKey, out db))
             {
-                var response = db.LoadStatistic;
+                var response = new
+                {
+                    LoadDbFromDiskTime = db.LoadStatistic.LoadDbFromDiskTime.Milliseconds,
+                    ConvertBytesToObjectsTime = db.LoadStatistic.ConvertBytesToObjectsTime.Milliseconds
+                };
                 return Json(response);
             }
 
