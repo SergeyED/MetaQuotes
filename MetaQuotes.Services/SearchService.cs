@@ -28,7 +28,6 @@ namespace MetaQuotes.Services
             SetSearchResultToCache(CacheConstants.SearchByCityCacheName(city), cities);
 
             return cities;
-
         }
 
         public List<City> SearchByIpAddress(string ip)
