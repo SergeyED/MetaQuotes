@@ -31,7 +31,7 @@ namespace MetaQuotes.Services
             offset = (int)header.OffsetLocations;
             var cities = ReadBinaryToList(header.Records, file, offset, 96);
             
-            offset = (int)header.OffsetLocations;
+            offset = (int)header.OffsetCities;
             var locations = ReadBinaryToList(header.Records, file, offset, 4);
 
             timer.Stop();
