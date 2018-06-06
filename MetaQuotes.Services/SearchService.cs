@@ -1,8 +1,10 @@
-﻿using MetaQuotes.Models;
+﻿using System;
+using MetaQuotes.Models;
 using MetaQuotes.Services.Common;
 using Microsoft.Extensions.Caching.Memory;
 using System.Linq;
 using System.Collections.Generic;
+using System.Text;
 using MetaQuotes.Models.Version2;
 namespace MetaQuotes.Services
 {
@@ -105,25 +107,25 @@ namespace MetaQuotes.Services
             {
                 int midIndex = firstIndex + (lastIndex - firstIndex) / 2;
 
-                var midRangeFrom = db.IpRanges[midIndex, 1];
-                var midRangeTo = db.IpRanges[midIndex, 2];
+                var midRangeFrom = db.IpRanges[midIndex, 0];
+                var midRangeTo = db.IpRanges[midIndex, 1];
 
-                if (intAddress >= midRangeFrom && intAddress <= midRangeFrom)
+                if (intAddress >= midRangeFrom && intAddress <= midRangeTo)
                 {
-                    var index = db.Locations[midIndex];
+                    var index = db.IpRanges[midIndex, 2];
                     return GetCityByIndex(db, index);
                 }
 
                 if (intAddress < midRangeFrom){
-                    firstIndex = midIndex - 1;
+                    lastIndex = midIndex - 1;
                 } else {
-                    lastIndex = midIndex + 1;
+                    firstIndex = midIndex + 1;
                 }
             }
             return null;
         }
 
-        private City GetCityByIndex(BinaryGeoBase db, int index)
+        private City GetCityByIndex(BinaryGeoBase db, uint index)
         {
             byte[] cityObject = new byte[96];
             for (int i = 0; i < 96; i++)
@@ -134,9 +136,61 @@ namespace MetaQuotes.Services
             return city;
         }
 
-        public List<City> BinarySearchByCityName(string city)
+        /// <summary>
+        /// Бинарный поиск города по байтам
+        /// </summary>
+        /// <param name="cityName"></param>
+        /// <returns></returns>
+        public List<City> BinarySearchByCityName(string cityName)
         {
-            throw new System.NotImplementedException();
+            var cities = new List<City>();
+            if (!_memoryCache.TryGetValue(CacheConstants.BinaryGeoBaseKey, out BinaryGeoBase db)) return null;
+
+            byte[] searchBytes = new byte[24];
+            searchBytes = Encoding.ASCII.GetBytes(cityName.PadRight(24, '\0'));
+
+            var firstIndex = 0;
+            var lastIndex = db.Locations.Length;
+
+            while (firstIndex < lastIndex)
+            {
+                int midIndex = firstIndex + (lastIndex - firstIndex) / 2;
+
+                var midLocation = db.Locations[midIndex];
+                var tmp = new byte[24];
+                Buffer.BlockCopy(db.Cities, midLocation + 32, tmp, 0, 24);
+                
+                var result = searchBytes.SequenceEqual(tmp);
+                if (!result)
+                {
+                    for (int i = 0; i < searchBytes.Length; i++)
+                    {
+                        if (searchBytes[i] == tmp[i])
+                        {  
+                            continue;
+                        }
+
+                        if (searchBytes[i] > tmp[i])
+                        {
+                            firstIndex = midIndex + 1;
+                            break;
+                        }
+
+                        lastIndex = midIndex - 1; ;
+                        break;
+                    }
+                }
+                else
+                {
+                    byte[] cityBytes = new byte[96];
+                    Buffer.BlockCopy(db.Cities, midLocation, cityBytes, 0, 96);
+                    var city = _converterService.ConvertToCity(cityBytes, 0);
+                    cities.Add(city);
+
+                    //Продолжить поиск в обе стороны, т.к. город может повторяться
+                }
+            }
+            return cities;
         }
     }
 }

@@ -24,8 +24,7 @@ namespace MetaQuotes.Services
                 throw new Exception("Не удалось сконвертировать структуру Header");
             }
 
-            var ipRanges = new int[header.Records, 3];
-
+            var ipRanges = new uint[header.Records, 3];
             Buffer.BlockCopy(file, (int)header.OffsetRanges, ipRanges, 0, header.Records * 12);
 
             var cities = new byte[header.Records, 96];

@@ -6,7 +6,7 @@
             
         }
 
-        public BinaryGeoBase(HeaderBuffer header, int[,] ipRanges, byte[,] cities, int[] locations)
+        public BinaryGeoBase(HeaderBuffer header, uint[,] ipRanges, byte[,] cities, int[] locations)
         {
             Header = header;
             IpRanges = ipRanges;
@@ -15,7 +15,7 @@
         }
 
         public HeaderBuffer Header { get; }
-        public int[,] IpRanges { get; }
+        public uint[,] IpRanges { get; }
         public byte[,] Cities { get; }
         public int[] Locations { get; }
 

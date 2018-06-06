@@ -31,7 +31,8 @@ namespace TestApp2.Controllers
         [Route("city/locations")]
         public JsonResult GetByCity(string city)
         {
-            var response = _searchService.SearchByCityName(city);
+            //var response = _searchService.SearchByCityName(city);
+            var response = _searchService.BinarySearchByCityName(city);
             return Json(response);
         }
 

@@ -59,7 +59,7 @@ namespace MetaQuotes.WebApp
             if (!_memoryCache.TryGetValue(CacheConstants.BinaryGeoBaseKey, out db))
             {
                 //var loader = new BinaryLoader();
-                db = experimentalBinaryLoader.ReadBinaryFileToByteArray(@"/Users/cepega/Documents/geobase.dat");
+                db = experimentalBinaryLoader.ReadBinaryFileToByteArray(@"D:\Work\geobase.dat");
                 var cacheEntryOptions = new MemoryCacheEntryOptions().SetPriority(CacheItemPriority.NeverRemove);
                 _memoryCache.Set(CacheConstants.BinaryGeoBaseKey, db, cacheEntryOptions);
             }
@@ -72,7 +72,7 @@ namespace MetaQuotes.WebApp
             if (!_memoryCache.TryGetValue(CacheConstants.GeoBaseKey, out db))
             {
                 //var loader = new BinaryLoader();
-                db = binaryLoader.LoadDb(@"/Users/cepega/Documents/geobase.dat");
+                db = binaryLoader.LoadDb(@"D:\Work\geobase.dat");
                 var cacheEntryOptions = new MemoryCacheEntryOptions().SetPriority(CacheItemPriority.NeverRemove);
                 _memoryCache.Set(CacheConstants.GeoBaseKey, db, cacheEntryOptions);
             }
