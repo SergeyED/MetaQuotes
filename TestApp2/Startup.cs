@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using MetaQuotes.Models.Version2;
 
 namespace MetaQuotes.WebApp
 {
@@ -27,10 +28,13 @@ namespace MetaQuotes.WebApp
             services.AddMvc();
 
             services.AddScoped<ISearchService, SearchService>();
+            services.AddScoped<IBinaryLoader, BinaryLoader>();
+            services.AddScoped<IExperimentalBinaryLoader, ExperimentalBinaryLoader>();
+            services.AddScoped<IConverterService, ConverterService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env, IMemoryCache cache)
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env, IMemoryCache cache, IBinaryLoader binaryLoader, IExperimentalBinaryLoader experimentalBinaryLoader)
         {
             if (env.IsDevelopment())
             {
@@ -43,17 +47,32 @@ namespace MetaQuotes.WebApp
             app.UseMvc();
             app.UseStaticFiles();
 
-            LoadGeoBase();
+            LoadGeoBase(binaryLoader);
+            LoadBinaryGeoBase(experimentalBinaryLoader);
+
         }
 
-        public void LoadGeoBase(){
+        public void LoadBinaryGeoBase(IExperimentalBinaryLoader experimentalBinaryLoader){
+
+            var db = new BinaryGeoBase();
+
+            if (!_memoryCache.TryGetValue(CacheConstants.BinaryGeoBaseKey, out db))
+            {
+                //var loader = new BinaryLoader();
+                db = experimentalBinaryLoader.ReadBinaryFileToByteArray(@"/Users/cepega/Documents/geobase.dat");
+                var cacheEntryOptions = new MemoryCacheEntryOptions().SetPriority(CacheItemPriority.NeverRemove);
+                _memoryCache.Set(CacheConstants.BinaryGeoBaseKey, db, cacheEntryOptions);
+            }
+
+        }
+
+        public void LoadGeoBase(IBinaryLoader binaryLoader){
             var db = new GeoBase();
 
             if (!_memoryCache.TryGetValue(CacheConstants.GeoBaseKey, out db))
             {
-                var loader = new BinaryLoader();
-                db = loader.LoadDb(@"D:\Work\geobase3.dat");
-
+                //var loader = new BinaryLoader();
+                db = binaryLoader.LoadDb(@"/Users/cepega/Documents/geobase.dat");
                 var cacheEntryOptions = new MemoryCacheEntryOptions().SetPriority(CacheItemPriority.NeverRemove);
                 _memoryCache.Set(CacheConstants.GeoBaseKey, db, cacheEntryOptions);
             }

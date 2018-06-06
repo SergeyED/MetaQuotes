@@ -17,5 +17,9 @@ namespace MetaQuotes.Services
         /// <returns>The by city name.</returns>
         /// <param name="city">City.</param>
         List<City> SearchByCityName(string city);
+
+        City BinarySearchByIpAddress(string ip);
+
+        List<City> BinarySearchByCityName(string city);
     }
 }

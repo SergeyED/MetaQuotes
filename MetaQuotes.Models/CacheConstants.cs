@@ -3,6 +3,7 @@
     public static class CacheConstants
     {
         public const string GeoBaseKey = "GeoBaseCache";
+        public const string BinaryGeoBaseKey = "BinaryGeoBaseKey";
 
         public static string SearchByIpCacheName(string ip)
         {

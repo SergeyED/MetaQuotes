@@ -9,6 +9,13 @@ namespace MetaQuotes.Services
 {
     public class BinaryLoader : IBinaryLoader
     {
+        private readonly IConverterService converterService;
+
+        public BinaryLoader(IConverterService converterService)
+        {
+            this.converterService = converterService;
+        }
+
         public GeoBase LoadDb(string filePath)
         {
             if (string.IsNullOrWhiteSpace(filePath))
@@ -21,7 +28,7 @@ namespace MetaQuotes.Services
 
             return db;
         }
-        
+
         private GeoBase ReadBinaryFile(string filePath)
         {
             var db = new GeoBase();
@@ -47,7 +54,7 @@ namespace MetaQuotes.Services
 
             try
             {
-                db.Ranges = ConvertToIpRanges(file, (int) db.Header.OffsetRanges, db.Header.Records);
+                db.Ranges = ConvertToIpRanges(file, (int)db.Header.OffsetRanges, db.Header.Records);
             }
             catch (Exception exception)
             {
@@ -56,7 +63,7 @@ namespace MetaQuotes.Services
 
             try
             {
-                db.Cities = ConvertToCities(file, (int) db.Header.OffsetLocations, db.Header.Records);
+                db.Cities = ConvertToCities(file, (int)db.Header.OffsetLocations, db.Header.Records);
             }
             catch (Exception exception)
             {
@@ -65,7 +72,7 @@ namespace MetaQuotes.Services
 
             try
             {
-                db.Locations = ConvertToLocations(file, (int) db.Header.OffsetCities, db.Header.Records);
+                db.Locations = ConvertToLocations(file, (int)db.Header.OffsetCities, db.Header.Records);
             }
             catch (Exception exception)
             {
@@ -81,7 +88,7 @@ namespace MetaQuotes.Services
         }
 
         private Header ConvertToHeader(byte[] file, int offset)
-        {   
+        {
             var version = BitConverter.ToInt32(file, offset);
             offset += 4;
             var name = new string(Encoding.Default.GetChars(file, offset, 32)).TrimEnd('\0');
@@ -114,27 +121,6 @@ namespace MetaQuotes.Services
             return ipRange;
         }
 
-        private City ConvertToCity(byte[] file, int offset)
-        {
-            var country = Encoding.Default.GetString(file, offset, 8).TrimEnd('\0');
-            offset += 8;
-            var region = Encoding.Default.GetString(file, offset, 12).TrimEnd('\0');
-            offset += 12;
-            var postal = Encoding.Default.GetString(file, offset, 8).TrimEnd('\0');
-            offset += 12;
-            var cityName = Encoding.Default.GetString(file, offset, 24).TrimEnd('\0');
-            offset += 24;
-            var organization = Encoding.Default.GetString(file, offset, 32).TrimEnd('\0');
-            offset += 32;
-            var latitude = BitConverter.ToSingle(file, offset);
-            offset += 4;
-            var longitude = BitConverter.ToSingle(file, offset);
-
-            var city = new City(country, region, postal, cityName, organization, latitude, longitude);
-
-            return city;
-        }
-
         private Location ConvertToLocation(byte[] file, int offset)
         {
             var index = BitConverter.ToUInt32(file, offset);
@@ -162,7 +148,7 @@ namespace MetaQuotes.Services
             var cities = new City[count];
             for (int i = 0; i < count; i++)
             {
-                var city = ConvertToCity(file, offset);
+                var city =  converterService.ConvertToCity(file, offset);
                 cities[i] = city;
                 offset += 96;
             }
@@ -184,5 +170,28 @@ namespace MetaQuotes.Services
         }
     }
 
-}
+    public class ConverterService : IConverterService
+    {
+        public City ConvertToCity(byte[] source, int offset)
+        {
+            var country = Encoding.Default.GetString(source, offset, 8).TrimEnd('\0');
+            offset += 8;
+            var region = Encoding.Default.GetString(source, offset, 12).TrimEnd('\0');
+            offset += 12;
+            var postal = Encoding.Default.GetString(source, offset, 8).TrimEnd('\0');
+            offset += 12;
+            var cityName = Encoding.Default.GetString(source, offset, 24).TrimEnd('\0');
+            offset += 24;
+            var organization = Encoding.Default.GetString(source, offset, 32).TrimEnd('\0');
+            offset += 32;
+            var latitude = BitConverter.ToSingle(source, offset);
+            offset += 4;
+            var longitude = BitConverter.ToSingle(source, offset);
 
+            var city = new City(country, region, postal, cityName, organization, latitude, longitude);
+
+            return city;
+        }
+    }
+
+}

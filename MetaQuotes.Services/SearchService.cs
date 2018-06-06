@@ -3,15 +3,18 @@ using MetaQuotes.Services.Common;
 using Microsoft.Extensions.Caching.Memory;
 using System.Linq;
 using System.Collections.Generic;
+using MetaQuotes.Models.Version2;
 namespace MetaQuotes.Services
 {
     public class SearchService : ISearchService
     {
         private readonly IMemoryCache _memoryCache;
+        private readonly IConverterService _converterService;
 
-        public SearchService(IMemoryCache memoryCache)
+        public SearchService(IMemoryCache memoryCache, IConverterService converterService)
         {
             _memoryCache = memoryCache;
+            _converterService = converterService;
         }
 
         public List<City> SearchByCityName(string city)
@@ -87,6 +90,53 @@ namespace MetaQuotes.Services
         {
             var cacheEntryOptions = new MemoryCacheEntryOptions().SetPriority(CacheItemPriority.NeverRemove);
             _memoryCache.Set(cacheName, result, cacheEntryOptions);
+        }
+
+        public City BinarySearchByIpAddress(string ip)
+        {
+            if (!_memoryCache.TryGetValue(CacheConstants.BinaryGeoBaseKey, out BinaryGeoBase db)) return null;
+
+            var intAddress = IpAddressHelpers.IpToUint(ip);
+
+            var firstIndex = 0;
+            var lastIndex = db.Header.Records;
+
+            while (firstIndex < lastIndex)
+            {
+                int midIndex = firstIndex + (lastIndex - firstIndex) / 2;
+
+                var midRangeFrom = db.IpRanges[midIndex, 1];
+                var midRangeTo = db.IpRanges[midIndex, 2];
+
+                if (intAddress >= midRangeFrom && intAddress <= midRangeFrom)
+                {
+                    var index = db.Locations[midIndex];
+                    return GetCityByIndex(db, index);
+                }
+
+                if (intAddress < midRangeFrom){
+                    firstIndex = midIndex - 1;
+                } else {
+                    lastIndex = midIndex + 1;
+                }
+            }
+            return null;
+        }
+
+        private City GetCityByIndex(BinaryGeoBase db, int index)
+        {
+            byte[] cityObject = new byte[96];
+            for (int i = 0; i < 96; i++)
+            {
+                cityObject[i] = db.Cities[index, i];
+            }
+            var city = _converterService.ConvertToCity(cityObject, 0);
+            return city;
+        }
+
+        public List<City> BinarySearchByCityName(string city)
+        {
+            throw new System.NotImplementedException();
         }
     }
 }

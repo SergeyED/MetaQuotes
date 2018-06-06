@@ -1,7 +1,9 @@
-﻿namespace MetaQuotes.Services
+﻿using MetaQuotes.Models.Version2;
+
+namespace MetaQuotes.Services
 {
     public interface IExperimentalBinaryLoader
     {
-        void ReadBinaryFileToByteArray(string filePath);
+        BinaryGeoBase ReadBinaryFileToByteArray(string filePath);
     }
 }

@@ -22,7 +22,8 @@ namespace TestApp2.Controllers
         [Route("ip/location")]
         public JsonResult GetByIp(string ip)
         {
-            var response = _searchService.SearchByIpAddress(ip);
+            //var response = _searchService.SearchByIpAddress(ip);
+            var response = _searchService.BinarySearchByIpAddress(ip);
             return Json(response);
         }
 
