@@ -165,38 +165,47 @@ namespace MetaQuotes.Services
                 byte[] binaryCity = GetCityForCompare(db, midLocation);
 
                 var result = searchBytes.SequenceEqual(binaryCity);
-                if (!result)
+                if (result != 0)
                 {
-                    for (int i = 0; i < searchBytes.Length; i++)
+                    if (result > 0)
                     {
-                        if (searchBytes[i] == binaryCity[i])
-                        {
-                            //если части слова повторяются, идем до отличия чтобы понять куда будет смещение
-                            continue;
-                        }
-
-                        if (searchBytes[i] > binaryCity[i])
-                        {
-                            firstIndex = midIndex + 1;
-                            break;
-                        }
-
-                        lastIndex = midIndex - 1; ;
+                        lastIndex = midIndex - 1;
                         break;
                     }
-                }
-                else
-                {
-                    City city = GetConvertedCity(db, midLocation);
-                    cities.Add(city);
+                    else
+                    {
+                        firstIndex = midIndex + 1;
+                        break;
+                    }
+                    
+                    //for (int i = 0; i < searchBytes.Length; i++)
+                    //{
+                    //    if (searchBytes[i] == binaryCity[i])
+                    //    {
+                    //        //если части слова повторяются, идем до отличия чтобы понять куда будет смещение
+                    //        continue;
+                    //    }
 
-                    //Продолжить поиск в обе стороны, т.к. город может повторяться, а так как они отсортированы, 
-                    //то идем до первого отличия
-                    SearchCityToRight(cities, db, searchBytes, lastIndex, midIndex);
-                    SearchCityToLeft(cities, db, searchBytes, firstIndex, midIndex);
+                    //    if (searchBytes[i] > binaryCity[i])
+                    //    {
+                    //        firstIndex = midIndex + 1;
+                    //        break;
+                    //    }
 
-                    return;
+                    //    lastIndex = midIndex - 1; ;
+                    //    break;
+                    //}
                 }
+
+                City city = GetConvertedCity(db, midLocation);
+                cities.Add(city);
+
+                //Продолжить поиск в обе стороны, т.к. город может повторяться, а так как они отсортированы, 
+                //то идем до первого отличия
+                SearchCityToRight(cities, db, searchBytes, lastIndex, midIndex);
+                SearchCityToLeft(cities, db, searchBytes, firstIndex, midIndex);
+
+                return;
             }
         }
 
@@ -207,7 +216,7 @@ namespace MetaQuotes.Services
                 rightOffset++;
                 var midLocation = db.Locations[rightOffset];
                 var binaryCity = GetCityForCompare(db, midLocation);
-                if (searchBytes.SequenceEqual(binaryCity))
+                if (searchBytes.SequenceEqual(binaryCity) == 0)
                 {
                     cities.Add(GetConvertedCity(db, midLocation));
                 }
@@ -226,7 +235,7 @@ namespace MetaQuotes.Services
                 leftOffset--;
                 var midLocation = db.Locations[leftOffset];
                 var binaryCity = GetCityForCompare(db, midLocation);
-                if (searchBytes.SequenceEqual(binaryCity))
+                if (searchBytes.SequenceEqual(binaryCity) == 0)
                 {
                     cities.Add(GetConvertedCity(db, midLocation));
                 }
