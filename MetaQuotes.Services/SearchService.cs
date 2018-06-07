@@ -147,30 +147,35 @@ namespace MetaQuotes.Services
             if (!_memoryCache.TryGetValue(CacheConstants.BinaryGeoBaseKey, out BinaryGeoBase db)) return null;
 
             byte[] searchBytes = new byte[24];
-            searchBytes = Encoding.ASCII.GetBytes(cityName.PadRight(24, '\0'));
+            searchBytes = Encoding.ASCII.GetBytes(cityName.PadRight(24, '\0')); //Добиваем искомый город нолями справа для сравнения
 
             var firstIndex = 0;
             var lastIndex = db.Locations.Length;
+            SearchByCurrentIndexes(cities, db, searchBytes, firstIndex, lastIndex);
+            return cities;
+        }
 
+        private void SearchByCurrentIndexes(List<City> cities, BinaryGeoBase db, byte[] searchBytes, int firstIndex, int lastIndex)
+        {
             while (firstIndex < lastIndex)
             {
                 int midIndex = firstIndex + (lastIndex - firstIndex) / 2;
 
                 var midLocation = db.Locations[midIndex];
-                var tmp = new byte[24];
-                Buffer.BlockCopy(db.Cities, midLocation + 32, tmp, 0, 24);
-                
-                var result = searchBytes.SequenceEqual(tmp);
+                byte[] binaryCity = GetCityForCompare(db, midLocation);
+
+                var result = searchBytes.SequenceEqual(binaryCity);
                 if (!result)
                 {
                     for (int i = 0; i < searchBytes.Length; i++)
                     {
-                        if (searchBytes[i] == tmp[i])
-                        {  
+                        if (searchBytes[i] == binaryCity[i])
+                        {
+                            //если части слова повторяются, идем до отличия чтобы понять куда будет смещение
                             continue;
                         }
 
-                        if (searchBytes[i] > tmp[i])
+                        if (searchBytes[i] > binaryCity[i])
                         {
                             firstIndex = midIndex + 1;
                             break;
@@ -182,15 +187,71 @@ namespace MetaQuotes.Services
                 }
                 else
                 {
-                    byte[] cityBytes = new byte[96];
-                    Buffer.BlockCopy(db.Cities, midLocation, cityBytes, 0, 96);
-                    var city = _converterService.ConvertToCity(cityBytes, 0);
+                    City city = GetConvertedCity(db, midLocation);
                     cities.Add(city);
 
-                    //Продолжить поиск в обе стороны, т.к. город может повторяться
+                    //Продолжить поиск в обе стороны, т.к. город может повторяться, а так как они отсортированы, 
+                    //то идем до первого отличия
+                    SearchCityToRight(cities, db, searchBytes, lastIndex, midIndex);
+                    SearchCityToLeft(cities, db, searchBytes, firstIndex, midIndex);
+
+                    return;
                 }
             }
-            return cities;
+        }
+
+        private void SearchCityToRight(List<City> cities, BinaryGeoBase db, byte[] searchBytes, int lastIndex, int rightOffset)
+        {
+            while (lastIndex >= rightOffset)
+            {
+                rightOffset++;
+                var midLocation = db.Locations[rightOffset];
+                var binaryCity = GetCityForCompare(db, midLocation);
+                if (searchBytes.SequenceEqual(binaryCity))
+                {
+                    cities.Add(GetConvertedCity(db, midLocation));
+                }
+                else
+                {
+                    break;
+                    //Если попали сюда, значит у нас больше нет городов с таким названием в этом напрпавлении
+                }
+            }
+        }
+
+        private void SearchCityToLeft(List<City> cities, BinaryGeoBase db, byte[] searchBytes, int firstIndex, int leftOffset)
+        {
+            while (firstIndex <= leftOffset)
+            {
+                leftOffset--;
+                var midLocation = db.Locations[leftOffset];
+                var binaryCity = GetCityForCompare(db, midLocation);
+                if (searchBytes.SequenceEqual(binaryCity))
+                {
+                    cities.Add(GetConvertedCity(db, midLocation));
+                }
+                else
+                {
+                    break;
+                    //Если попали сюда, значит у нас больше нет городов с таким названием в этом напрпавлении
+                }
+            }
+        }
+
+
+        private City GetConvertedCity(BinaryGeoBase db, int midLocation)
+        {
+            byte[] cityBytes = new byte[96];
+            Buffer.BlockCopy(db.Cities, midLocation, cityBytes, 0, 96);
+            var city = _converterService.ConvertToCity(cityBytes, 0);
+            return city;
+        }
+
+        private static byte[] GetCityForCompare(BinaryGeoBase db, int midLocation)
+        {
+            var binaryCity = new byte[24];
+            Buffer.BlockCopy(db.Cities, midLocation + 32, binaryCity, 0, 24);
+            return binaryCity;
         }
     }
 }
