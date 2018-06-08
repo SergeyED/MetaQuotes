@@ -68,29 +68,50 @@
         }
 
         function showResult(response) {
+            cleanSearchResults();
 
             if (response.length > 0) {
                 document.getElementById("nothingFound").style.display = "none";
                 document.getElementById("resultBlock").style.display = "block";
-                document.getElementsByName("country")[0].innerHTML = response[0].country;
-                document.getElementsByName("region")[0].innerHTML = response[0].region;
-                document.getElementsByName("postal")[0].innerHTML = response[0].postal;
-                document.getElementsByName("cityName")[0].innerHTML = response[0].cityName;
-                document.getElementsByName("organization")[0].innerHTML = response[0].organization;
-                document.getElementsByName("latitude")[0].innerHTML = response[0].latitude;
-                document.getElementsByName("longitude")[0].innerHTML = response[0].longitude;
+
+                for (var i = 0; i < response.length; i++) {
+                    if (response.length > 1) {
+                        var newItem = document.getElementsByName("resultItemBlock")[0].cloneNode(true);
+                        document.getElementById("resultListBlock").appendChild(newItem);
+                    }
+                    document.getElementsByName("country")[i].innerHTML = response[i].country;
+                    document.getElementsByName("region")[i].innerHTML = response[i].region;
+                    document.getElementsByName("postal")[i].innerHTML = response[i].postal;
+                    document.getElementsByName("cityName")[i].innerHTML = response[i].cityName;
+                    document.getElementsByName("organization")[i].innerHTML = response[i].organization;
+                    document.getElementsByName("latitude")[i].innerHTML = response[i].latitude;
+                    document.getElementsByName("longitude")[i].innerHTML = response[i].longitude;
+                }
             } else {
                 document.getElementById("nothingFound").style.display = "block";
                 document.getElementById("resultBlock").style.display = "none";
-                document.getElementsByName("country")[0].innerHTML = '';
-                document.getElementsByName("region")[0].innerHTML = '';
-                document.getElementsByName("postal")[0].innerHTML ='';
-                document.getElementsByName("cityName")[0].innerHTML = '';
-                document.getElementsByName("organization")[0].innerHTML = '';
-                document.getElementsByName("latitude")[0].innerHTML = '';
-                document.getElementsByName("longitude")[0].innerHTML = '';
             }
         }
+
+        function cleanSearchResults() {
+            var searchResultBlocks = document.getElementsByName("resultItemBlock");
+
+            if (searchResultBlocks.length > 1) {
+                for (var i = 1; i < searchResultBlocks.length; i++) {
+                    searchResultBlocks[i].remove();
+                }
+            }
+
+            document.getElementsByName("country")[0].innerHTML = '';
+            document.getElementsByName("region")[0].innerHTML = '';
+            document.getElementsByName("postal")[0].innerHTML = '';
+            document.getElementsByName("cityName")[0].innerHTML = '';
+            document.getElementsByName("organization")[0].innerHTML = '';
+            document.getElementsByName("latitude")[0].innerHTML = '';
+            document.getElementsByName("longitude")[0].innerHTML = '';
+        }
+
+
 
         function openSearchByIpBlock() {
             document.getElementById("resultBlock").style.display = "none";
@@ -155,8 +176,8 @@
                         <div class="card-header">
                             Результаты поиска
                         </div>
-                        <div>
-                            <dl class="row p-3">
+                        <div id="resultListBlock">
+                            <dl class="row p-3" name="resultItemBlock">
                                 <dt class="col-sm-3">Country: </dt>
                                 <dd class="col-sm-9" name="country"></dd>
                                 <dt class="col-sm-3">Region: </dt>
@@ -178,7 +199,7 @@
             </div>
         </div>
 
-        
+
     </div>
 </body>
 </html>
