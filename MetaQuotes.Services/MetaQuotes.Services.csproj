@@ -15,4 +15,9 @@
     <Folder Include="Common\" />
     <Folder Include="Exceptions\" />
   </ItemGroup>
+  <ItemGroup>
+    <Compile Remove="BinaryLoader.cs" />
+    <Compile Remove="BinaryLoader.cs" />
+    <Compile Remove="BinaryLoader.cs" />
+  </ItemGroup>
 </Project>
