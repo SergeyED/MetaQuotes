@@ -3,11 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.27130.2010
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MetaQuotes.WebApp", "TestApp2\MetaQuotes.WebApp.csproj", "{47ADD5AF-09D0-4C4C-BB9D-3786DCCD2AD5}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MetaQuotes.WebApp", "TestApp2\MetaQuotes.WebApp.csproj", "{47ADD5AF-09D0-4C4C-BB9D-3786DCCD2AD5}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MetaQuotes.Models", "MetaQuotes.Models\MetaQuotes.Models.csproj", "{9F2D2F11-94BC-4D66-909A-432BD88C94C2}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MetaQuotes.Models", "MetaQuotes.Models\MetaQuotes.Models.csproj", "{9F2D2F11-94BC-4D66-909A-432BD88C94C2}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MetaQuotes.Services", "MetaQuotes.Services\MetaQuotes.Services.csproj", "{BBD0BB5E-427D-4A35-ACF4-85E37D6B8423}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MetaQuotes.Services", "MetaQuotes.Services\MetaQuotes.Services.csproj", "{BBD0BB5E-427D-4A35-ACF4-85E37D6B8423}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

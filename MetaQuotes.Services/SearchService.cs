@@ -12,11 +12,13 @@ namespace MetaQuotes.Services
     {
         private readonly IMemoryCache _memoryCache;
         private readonly IConverterService _converterService;
+        private readonly IRepository _repository;
 
-        public SearchService(IMemoryCache memoryCache, IConverterService converterService)
+        public SearchService(IMemoryCache memoryCache, IConverterService converterService, IRepository repository)
         {
             _memoryCache = memoryCache;
             _converterService = converterService;
+            _repository = repository;
         }
 
         public List<City> SearchByCityName(string city)
@@ -144,14 +146,14 @@ namespace MetaQuotes.Services
         public List<City> BinarySearchByCityName(string cityName)
         {
             var cities = new List<City>();
-            if (!_memoryCache.TryGetValue(CacheConstants.BinaryGeoBaseKey, out BinaryGeoBase db)) return null;
+            //if (!_memoryCache.TryGetValue(CacheConstants.BinaryGeoBaseKey, out BinaryGeoBase db)) return null;
 
             byte[] searchBytes = new byte[24];
             searchBytes = Encoding.ASCII.GetBytes(cityName.PadRight(24, '\0')); //Добиваем искомый город нолями справа для сравнения
 
             var firstIndex = 0;
-            var lastIndex = db.Locations.Length;
-            SearchByCurrentIndexes(cities, db, searchBytes, firstIndex, lastIndex);
+            var lastIndex = _repository.Db.Locations.Length;
+            SearchByCurrentIndexes(cities, _repository.Db, searchBytes, firstIndex, lastIndex);
             return cities;
         }
 

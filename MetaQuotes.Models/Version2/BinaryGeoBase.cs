@@ -1,6 +1,17 @@
 ﻿namespace MetaQuotes.Models.Version2
 {
-    public class BinaryGeoBase
+    public interface IBinaryGeoBase{
+        HeaderBuffer Header { get; }
+        uint[,] IpRanges { get; }
+        byte[,] Cities { get; }
+        int[] Locations { get; }
+
+        /// <summary>
+        /// Данные с логами времени загрузки базы. Требуется закгузка с диска не более 50мс.
+        /// </summary>
+        BaseLoadStatistic LoadStatistic { get; set; }
+    }
+    public class BinaryGeoBase: IBinaryGeoBase
     {
         public BinaryGeoBase(){
             
