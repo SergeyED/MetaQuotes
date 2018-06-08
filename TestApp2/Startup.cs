@@ -28,13 +28,18 @@ namespace MetaQuotes.WebApp
             services.AddMvc();
 
             services.AddScoped<ISearchService, SearchService>();
-            services.AddScoped<IBinaryLoader, BinaryLoader>();
-            services.AddScoped<IExperimentalBinaryLoader, ExperimentalBinaryLoader>();
+            services.AddSingleton<IRepository, Repository>();
             services.AddScoped<IConverterService, ConverterService>();
+
+            //services.AddSingleton<IBinaryGeoBase, BinaryGeoBase>(service => {
+            //    var db = service.GetService<IExperimentalBinaryLoader>().ReadBinaryFileToByteArray(@"/Users/cepega/Documents/geobase.dat");
+            //    return db;
+
+            //});
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env, IMemoryCache cache, IBinaryLoader binaryLoader, IExperimentalBinaryLoader experimentalBinaryLoader)
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env, IMemoryCache cache, IRepository experimentalBinaryLoader)
         {
             if (env.IsDevelopment())
             {
@@ -47,35 +52,7 @@ namespace MetaQuotes.WebApp
             app.UseMvc();
             app.UseStaticFiles();
 
-            LoadGeoBase(binaryLoader);
-            LoadBinaryGeoBase(experimentalBinaryLoader);
-
-        }
-
-        public void LoadBinaryGeoBase(IExperimentalBinaryLoader experimentalBinaryLoader){
-
-            var db = new BinaryGeoBase();
-
-            if (!_memoryCache.TryGetValue(CacheConstants.BinaryGeoBaseKey, out db))
-            {
-                //var loader = new BinaryLoader();
-                db = experimentalBinaryLoader.ReadBinaryFileToByteArray(@"D:\Work\geobase.dat");
-                var cacheEntryOptions = new MemoryCacheEntryOptions().SetPriority(CacheItemPriority.NeverRemove);
-                _memoryCache.Set(CacheConstants.BinaryGeoBaseKey, db, cacheEntryOptions);
-            }
-
-        }
-
-        public void LoadGeoBase(IBinaryLoader binaryLoader){
-            var db = new GeoBase();
-
-            if (!_memoryCache.TryGetValue(CacheConstants.GeoBaseKey, out db))
-            {
-                //var loader = new BinaryLoader();
-                db = binaryLoader.LoadDb(@"D:\Work\geobase.dat");
-                var cacheEntryOptions = new MemoryCacheEntryOptions().SetPriority(CacheItemPriority.NeverRemove);
-                _memoryCache.Set(CacheConstants.GeoBaseKey, db, cacheEntryOptions);
-            }
+            experimentalBinaryLoader.Load(@"/Users/cepega/Documents/geobase.dat");
         }
     }
 }
