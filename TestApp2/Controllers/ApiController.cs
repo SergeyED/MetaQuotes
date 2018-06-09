@@ -1,28 +1,26 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using MetaQuotes.Services;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
-using System.Text;
-using MetaQuotes.Services;
-using MetaQuotes.Models;
-using MetaQuotes.Services.Common;
 
-namespace TestApp2.Controllers
+namespace MetaQuotes.WebApp.Controllers
 {
     public class ApiController : Controller
     {
         private readonly IMemoryCache _memoryCache;
         private readonly ISearchService _searchService;
+        private readonly IRepository _repository;
 
-        public ApiController(IMemoryCache cache, ISearchService searchService)
+        public ApiController(IMemoryCache cache, ISearchService searchService, IRepository repository)
         {
             _memoryCache = cache;
             _searchService = searchService;
+            _repository = repository;
         }
 
         [HttpGet]
         [Route("ip/location")]
         public JsonResult GetByIp(string ip)
         {
-            //var response = _searchService.SearchByIpAddress(ip);
             var response = _searchService.BinarySearchByIpAddress(ip);
             return Json(response);
         }
@@ -31,27 +29,24 @@ namespace TestApp2.Controllers
         [Route("city/locations")]
         public JsonResult GetByCity(string city)
         {
-            //var response = _searchService.SearchByCityName(city);
             var response = _searchService.BinarySearchByCityName(city);
             return Json(response);
         }
 
+        /// <summary>
+        /// Получение статистики загрузки базы
+        /// </summary>
+        /// <returns></returns>
         [HttpGet]
         [Route("api/stat")]
         public JsonResult GetStat()
         {
-            GeoBase db;
-            if (_memoryCache.TryGetValue(CacheConstants.GeoBaseKey, out db))
+            var response = new
             {
-                var response = new
-                {
-                    LoadDbFromDiskTime = db.LoadStatistic.LoadDbFromDiskTime.Milliseconds,
-                    ConvertBytesToObjectsTime = db.LoadStatistic.ConvertBytesToObjectsTime.Milliseconds
-                };
-                return Json(response);
-            }
-
-            return Json(null);
+                LoadDbFromDiskTime = _repository.Db.LoadStatistic.LoadDbFromDiskTime.Milliseconds,
+                ConvertBytesToObjectsTime = _repository.Db.LoadStatistic.ConvertBytesToObjectsTime.Milliseconds
+            };
+            return Json(response);
         }
     }
 }

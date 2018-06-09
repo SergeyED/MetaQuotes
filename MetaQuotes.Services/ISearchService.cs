@@ -9,17 +9,13 @@ namespace MetaQuotes.Services
         /// </summary>
         /// <returns>The by ip address.</returns>
         /// <param name="ip">Ip.</param>
-        List<City> SearchByIpAddress(string ip);
+        City[] BinarySearchByIpAddress(string ip);
 
         /// <summary>
         /// Поиск по точному назвванию города
         /// </summary>
         /// <returns>The by city name.</returns>
         /// <param name="city">City.</param>
-        List<City> SearchByCityName(string city);
-
-        City BinarySearchByIpAddress(string ip);
-
-        List<City> BinarySearchByCityName(string city);
+        City[] BinarySearchByCityName(string city);
     }
 }

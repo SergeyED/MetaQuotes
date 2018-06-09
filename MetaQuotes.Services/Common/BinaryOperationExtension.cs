@@ -43,6 +43,10 @@ namespace MetaQuotes.Services.Common
             {
                 while (e1.MoveNext())
                 {
+                    if (e1.Current == 32)
+                    {
+                        var ping = "";
+                    }
                     if (!(e2.MoveNext() && comparer.Equals(e1.Current, e2.Current))) return e1.Current - e2.Current;
                 }
                 if (e2.MoveNext()) return e1.Current - e2.Current;

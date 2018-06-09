@@ -45,14 +45,14 @@ namespace MetaQuotes.WebApp
             {
                 app.UseDeveloperExceptionPage();
             }
-
+            
             _memoryCache = cache;
             app.UseResponseCaching();
             
             app.UseMvc();
             app.UseStaticFiles();
 
-            experimentalBinaryLoader.Load(@"/Users/cepega/Documents/geobase.dat");
+            experimentalBinaryLoader.Load(@"D:\Work\geobase.dat");
         }
     }
 }
