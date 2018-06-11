@@ -21,6 +21,12 @@ namespace MetaQuotes.Services
             var timer = Stopwatch.StartNew();
             timer.Start();
 
+            if (string.IsNullOrWhiteSpace(filePath))
+                throw new FileNotFoundException("Не указано имя файла");
+
+            if (!File.Exists(filePath))
+                throw new FileNotFoundException($"Файл не существует по указанному пути: {filePath}");
+
             var file = File.ReadAllBytes(filePath);
             var header = file.ReadStruct<HeaderBuffer>(0);
             if (header.Equals(default(HeaderBuffer)))
