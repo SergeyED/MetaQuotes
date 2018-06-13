@@ -17,7 +17,6 @@ namespace MetaQuotes.WebApp
         }
 
         public IConfiguration Configuration { get; }
-        private IMemoryCache _memoryCache;
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
@@ -27,9 +26,10 @@ namespace MetaQuotes.WebApp
             services.AddRouting();
             services.AddMvc();
 
-            services.AddScoped<ISearchService, SearchService>();
+            services.AddTransient<IFileReadService, FileReadService>();
+            services.AddTransient<ISearchService, SearchService>();
             services.AddSingleton<IRepository, Repository>();
-            services.AddScoped<IConverterService, ConverterService>();
+            services.AddTransient<IConverterService, ConverterService>();
 
             //services.AddSingleton<IBinaryGeoBase, BinaryGeoBase>(service => {
             //    var db = service.GetService<IExperimentalBinaryLoader>().ReadBinaryFileToByteArray(@"/Users/cepega/Documents/geobase.dat");
@@ -39,20 +39,22 @@ namespace MetaQuotes.WebApp
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env, IMemoryCache cache, IRepository experimentalBinaryLoader)
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
             }
             
-            _memoryCache = cache;
-            app.UseResponseCaching();
+            //_memoryCache = cache;
+            //app.UseResponseCaching();
             
             app.UseMvc();
             app.UseStaticFiles();
 
-            experimentalBinaryLoader.Load(@"D:\Work\geobase.dat");
+
+            var repository = app.ApplicationServices.GetService<IRepository>();
+            repository.Load(@"/Users/cepega/Documents/geobase.dat");
         }
     }
 }
