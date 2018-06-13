@@ -37,8 +37,8 @@ namespace MetaQuotes.Services.Tests
 
             var header = converter.ConvertToHeader(binary, 0);
             var firstIpFrom = BitConverter.ToInt32(binary, (int)header.OffsetRanges);
-            var firstCity = converter.ConvertToCity(binary, (int)header.OffsetCities);
-            var secondIndex = BitConverter.ToInt32(binary, (int)header.OffsetLocations + Constants.IndexSize);
+            var firstCity = converter.ConvertToCity(binary, (int)header.OffsetLocations);
+            var secondIndex = BitConverter.ToInt32(binary, (int)header.OffsetCities + Constants.IndexSize);
 
             Assert.Equal(header.Name, GeoBaseTestData.DbName);
             Assert.Equal<int>(8, firstIpFrom);

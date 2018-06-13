@@ -1,11 +1,8 @@
-﻿using MetaQuotes.Models;
-using MetaQuotes.Services;
+﻿using MetaQuotes.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using MetaQuotes.Models.Version2;
 
 namespace MetaQuotes.WebApp
 {
@@ -31,11 +28,6 @@ namespace MetaQuotes.WebApp
             services.AddSingleton<IRepository, Repository>();
             services.AddTransient<IConverterService, ConverterService>();
 
-            //services.AddSingleton<IBinaryGeoBase, BinaryGeoBase>(service => {
-            //    var db = service.GetService<IExperimentalBinaryLoader>().ReadBinaryFileToByteArray(@"/Users/cepega/Documents/geobase.dat");
-            //    return db;
-
-            //});
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

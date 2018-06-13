@@ -1,5 +1,4 @@
 ﻿using Moq;
-using System.IO;
 using Xunit;
 
 namespace MetaQuotes.Services.Tests
@@ -13,10 +12,21 @@ namespace MetaQuotes.Services.Tests
         public RepositoryTests()
         {
             repositoryMock = new Mock<IRepository>();
-            fileReadServiceMock = new Mock<IFileReadService>();
+
             converterServiceMock = new Mock<IConverterService>();
+
+            fileReadServiceMock = new Mock<IFileReadService>();
+            var binary = GeoBaseTestData.GetBinaryGeoBase();
+            fileReadServiceMock.Setup(x => x.ReadAllBytes("secret")).Returns(binary);
         }
 
+        [Fact]
+        public void LoadDbToSingletoneObjectTest(){
+            var repository = new Repository(fileReadServiceMock.Object, new ConverterService());
 
+            repository.Load("secret");
+
+            Assert.NotNull(repository.Db);
+        }
     }
 }

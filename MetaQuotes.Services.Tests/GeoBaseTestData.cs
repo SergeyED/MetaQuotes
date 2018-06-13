@@ -27,8 +27,8 @@ namespace MetaQuotes.Services.Tests
                 new Location(1)
             };
 
-            var offsetCities = Constants.HeaderSize + (uint)(Constants.IpRangeSize * ipRanges.Length);
-            var offsetLocations = offsetCities + (uint)(Constants.CitySize * cities.Length);
+            var offsetLocations = Constants.HeaderSize + (uint)(Constants.IpRangeSize * ipRanges.Length);
+            var offsetCities = offsetLocations + (uint)(Constants.CitySize * cities.Length);
             var header = new Header(1, DbName, (ulong)DateTime.Now.AddDays(-1).Ticks, 2, Constants.HeaderSize, offsetCities, offsetLocations);
 
             var binary = SerializeToByte(header, ipRanges, cities, locations);

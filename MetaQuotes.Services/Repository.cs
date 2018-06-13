@@ -42,7 +42,7 @@ namespace MetaQuotes.Services
 
             if ((int)header.OffsetLocations > binary.Length)
                 throw new IndexOutOfRangeException("Длинна бинарника меньше offset для городов");
-            var cities = new byte[header.Records, Constants.CitySize];
+            var cities = new byte[header.Records * Constants.CitySize];
             Buffer.BlockCopy(binary, (int)header.OffsetLocations, cities, 0, header.Records * Constants.CitySize);
 
             if ((int)header.OffsetCities > binary.Length)

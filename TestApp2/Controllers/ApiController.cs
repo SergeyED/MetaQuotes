@@ -1,4 +1,5 @@
-﻿using MetaQuotes.Services;
+﻿using MetaQuotes.Models;
+using MetaQuotes.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
 
@@ -29,7 +30,13 @@ namespace MetaQuotes.WebApp.Controllers
         [Route("city/locations")]
         public JsonResult GetByCity(string city)
         {
+            if (TryGetSearchResultFromCache(CacheConstants.SearchByCityCacheName(city), out City[] citiesFromCache))
+                return Json(citiesFromCache);
+
             var response = _searchService.BinarySearchByCityName(city);
+
+            //Кеширование лучше вынести в отдельный сервис, либо использовать Cache Response, который появился в Asp .Net Core 2.1 
+            SetSearchResultToCache(CacheConstants.SearchByCityCacheName(city), response);
             return Json(response);
         }
 
@@ -46,6 +53,33 @@ namespace MetaQuotes.WebApp.Controllers
                 LoadDbFromDiskTime = _repository.Db.LoadStatistic.LoadDbFromDiskTime.Milliseconds
             };
             return Json(response);
+        }
+
+        /// <summary>
+        /// Пытаемся достать результаты поиска из кеша
+        /// </summary>
+        /// <param name="cacheName">Имя кеша генерируется при помощи статичного класса CacheConstants</param>
+        /// <param name="result"></param>
+        /// <returns></returns>
+        private bool TryGetSearchResultFromCache(string cacheName, out City[] result)
+        {
+            if (_memoryCache.TryGetValue(cacheName, out result))
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Добавить результат поика в вечный кеш
+        /// </summary>
+        /// <param name="cacheName">Имя кеша генерируется при помощи статичного класса CacheConstants</param>
+        /// <param name="result"></param>
+        private void SetSearchResultToCache(string cacheName, City[] result)
+        {
+            var cacheEntryOptions = new MemoryCacheEntryOptions().SetPriority(CacheItemPriority.NeverRemove);
+            _memoryCache.Set(cacheName, result, cacheEntryOptions);
         }
     }
 }

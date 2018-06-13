@@ -33,8 +33,8 @@ namespace MetaQuotes.Services.Tests
             var converter = new ConverterService();
 
             var header = converter.ConvertToHeader(binary, 0);
-            var firstCity = converter.ConvertToCity(binary, (int)header.OffsetCities);
-            var secondCity = converter.ConvertToCity(binary, (int)header.OffsetCities + Constants.CitySize);
+            var firstCity = converter.ConvertToCity(binary, (int)header.OffsetLocations);
+            var secondCity = converter.ConvertToCity(binary, (int)header.OffsetLocations + Constants.CitySize);
 
             Assert.Equal(firstCity.CityName, "cit_1");
             Assert.Equal(secondCity.CityName, "cit_2");        

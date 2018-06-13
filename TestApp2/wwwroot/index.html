@@ -24,7 +24,6 @@
                 } else {
                     var response = JSON.parse(xhr.responseText);
                     document.getElementById("dbLoadTime").innerText += response.loadDbFromDiskTime;
-                    document.getElementById("dbCobvertToObjectsTime").innerText += response.convertBytesToObjectsTime;
                 }
             }
         }
@@ -137,8 +136,7 @@
                     <button class="btn" onclick="openSearchByCityBlock()">Поиск по городу</button>
                 </div>
                 <div class="alert alert-success" role="alert">
-                    <p>Загрузка базы: <span id="dbLoadTime"></span></p>
-                    <p>Конвертирование объектов: <span id="dbCobvertToObjectsTime"></span></p>
+                    Загрузка базы: <span id="dbLoadTime"></span>
                 </div>
 
             </div>

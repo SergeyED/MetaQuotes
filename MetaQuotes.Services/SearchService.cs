@@ -4,33 +4,31 @@ using MetaQuotes.Services.Common;
 using Microsoft.Extensions.Caching.Memory;
 using System.Collections.Generic;
 using System.Text;
+using System.Linq;
 namespace MetaQuotes.Services
 {
     public class SearchService : ISearchService
     {
-        private readonly IMemoryCache _memoryCache;
         private readonly IConverterService _converterService;
         private readonly IRepository _repository;
 
-        public SearchService(IMemoryCache memoryCache, IConverterService converterService, IRepository repository)
+        public SearchService(IConverterService converterService, IRepository repository)
         {
-            _memoryCache = memoryCache;
             _converterService = converterService;
             _repository = repository;
         }
 
         public City[] BinarySearchByIpAddress(string ip)
         {
-            if (_repository.Db == null){
-                throw new Exception("База данных не загружена");
-            }
-
             var intAddress = IpAddressHelpers.IpToUint(ip);
+
+            if (_repository.Db == null)
+                throw new Exception("База данных не загружена");
 
             var firstIndex = 0;
             var lastIndex = _repository.Db.Header.Records;
 
-            while (firstIndex < lastIndex)
+            while (firstIndex <= lastIndex)
             {
                 int midIndex = firstIndex + (lastIndex - firstIndex) / 2;
 
@@ -40,7 +38,7 @@ namespace MetaQuotes.Services
                 if (intAddress >= midRangeFrom && intAddress <= midRangeTo)
                 {
                     var index = _repository.Db.IpRanges[midIndex, 2];
-                    return new City[] { GetCityByIndex(index) };
+                    return new City[] { _converterService.ConvertToCity(_repository.Db.Cities, (int)index * Constants.CitySize) };
                 }
 
                 if (intAddress < midRangeFrom)
@@ -62,60 +60,23 @@ namespace MetaQuotes.Services
         /// <returns></returns>
         public City[] BinarySearchByCityName(string cityName)
         {
-            var cities = new List<City>();
-
             var searchBytes = Encoding.Default.GetBytes(cityName.PadRight(24, '\0'));
 
             var firstIndex = 0;
             var lastIndex = _repository.Db.Locations.Length;
 
-            SearchCityByIndexes(cities, searchBytes, firstIndex, lastIndex);
+            var cities = SearchCityByIndexes(searchBytes, firstIndex, lastIndex);
 
-            return cities.ToArray();
+            var result = cities.ToArray();
+
+            return result;
         }
 
 
-        /// <summary>
-        /// Пытаемся достать результаты поиска из кеша
-        /// </summary>
-        /// <param name="cacheName">Имя кеша генерируется при помощи статичного класса CacheConstants</param>
-        /// <param name="result"></param>
-        /// <returns></returns>
-        private bool TryGetSearchResultFromCache(string cacheName, out City[] result)
+        private List<City> SearchCityByIndexes(byte[] searchBytes, int firstIndex, int lastIndex)
         {
-            if (_memoryCache.TryGetValue(cacheName, out result))
-            {
-                return true;
-            }
-
-            return false;
-        }
-
-        /// <summary>
-        /// Добавить результат поика в вечный кеш
-        /// </summary>
-        /// <param name="cacheName">Имя кеша генерируется при помощи статичного класса CacheConstants</param>
-        /// <param name="result"></param>
-        private void SetSearchResultToCache(string cacheName, City[] result)
-        {
-            var cacheEntryOptions = new MemoryCacheEntryOptions().SetPriority(CacheItemPriority.NeverRemove);
-            _memoryCache.Set(cacheName, result, cacheEntryOptions);
-        }
-
-        private City GetCityByIndex(uint index)
-        {
-            byte[] binaryCity = new byte[Constants.CitySize];
-            for (int i = 0; i < Constants.CitySize; i++)
-            {
-                binaryCity[i] = _repository.Db.Cities[index, i];
-            }
-            var city = _converterService.ConvertToCity(binaryCity, 0);
-            return city;
-        }
-
-        private void SearchCityByIndexes(List<City> cities, byte[] searchBytes, int firstIndex, int lastIndex)
-        {
-            while (firstIndex < lastIndex)
+            var cities = new List<City>();
+            while (firstIndex <= lastIndex)
             {
                 int midIndex = firstIndex + (lastIndex - firstIndex) / 2;
 
@@ -138,7 +99,7 @@ namespace MetaQuotes.Services
                     
                 }
 
-                var city = ConvertToCity(midLocation);
+                var city = _converterService.ConvertToCity(_repository.Db.Cities, midLocation);
                 cities.Add(city);
 
                 //Продолжить поиск в обе стороны, т.к. город может повторяться, а так как они отсортированы, 
@@ -146,8 +107,10 @@ namespace MetaQuotes.Services
                 SearchCityToRight(cities, searchBytes, lastIndex, midIndex);
                 SearchCityToLeft(cities, searchBytes, firstIndex, midIndex);
 
-                return;
+                return cities;
             }
+
+            return cities;
         }
 
         private void SearchCityToRight(List<City> cities, byte[] searchBytes, int lastIndex, int rightOffset)
@@ -159,7 +122,7 @@ namespace MetaQuotes.Services
                 var binaryCity = GetBinaryCityForCompare(midLocation);
                 if (searchBytes.SequenceEqual(binaryCity) == 0)
                 {
-                    cities.Add(ConvertToCity(midLocation));
+                    cities.Add(_converterService.ConvertToCity(_repository.Db.Cities, midLocation));
                 }
                 else
                 {
@@ -171,6 +134,8 @@ namespace MetaQuotes.Services
 
         private void SearchCityToLeft(List<City> cities, byte[] searchBytes, int firstIndex, int leftOffset)
         {
+            if (leftOffset == 0) return;
+
             while (firstIndex <= leftOffset)
             {
                 leftOffset--;
@@ -178,7 +143,7 @@ namespace MetaQuotes.Services
                 var binaryCity = GetBinaryCityForCompare(midLocation);
                 if (searchBytes.SequenceEqual(binaryCity) == 0)
                 {
-                    cities.Add(ConvertToCity(midLocation));
+                    cities.Add(_converterService.ConvertToCity(_repository.Db.Cities, midLocation));
                 }
                 else
                 {
@@ -188,19 +153,9 @@ namespace MetaQuotes.Services
             }
         }
 
-
-        private City ConvertToCity(int midLocation)
-        {
-            var cityBytes = new byte[Constants.CitySize];
-            Buffer.BlockCopy(_repository.Db.Cities, midLocation, cityBytes, 0, Constants.CitySize);
-            var city = _converterService.ConvertToCity(cityBytes, 0);
-            return city;
-        }
-
         private byte[] GetBinaryCityForCompare(int midLocation)
         {
-            var binaryCity = new byte[24];
-            Buffer.BlockCopy(_repository.Db.Cities, midLocation + 32, binaryCity, 0, 24);
+            var binaryCity = _repository.Db.Cities.Skip(midLocation + 32).Take(24).ToArray();
 
             return binaryCity;
         }
