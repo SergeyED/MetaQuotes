@@ -1,18 +1,28 @@
 ﻿using System;
 using System.Diagnostics;
-using System.IO;
+using MetaQuotes.Models;
 using MetaQuotes.Models.Version2;
-using MetaQuotes.Services.Common;
 
 namespace MetaQuotes.Services
 {
     /// <summary>
-    /// Экспериментальый метод для чтения БД в память и разбивание на массивы, по которым планировалось, что будет происходить поиск.
-    /// Но скорость загрузки и разбивки по 3-м коллекциям составляет более 70 мс.
+    /// Метод для чтения БД в память и разбивание на массивы
     /// </summary>
     public class Repository : IRepository
     {
         private BinaryGeoBase _db;
+        private readonly IFileReadService _fileReadService;
+        private readonly IConverterService _converterService;
+
+        public Repository(IFileReadService fileReadService, IConverterService converterService)
+        {
+            _fileReadService = fileReadService;
+            _converterService = converterService;
+        }
+
+        public Repository()
+        {
+        }
 
         public BinaryGeoBase Db => _db;
 
@@ -21,34 +31,33 @@ namespace MetaQuotes.Services
             var timer = Stopwatch.StartNew();
             timer.Start();
 
-            if (string.IsNullOrWhiteSpace(filePath))
-                throw new FileNotFoundException("Не указано имя файла");
+            byte[] binary = _fileReadService.ReadAllBytes(filePath);
 
-            if (!File.Exists(filePath))
-                throw new FileNotFoundException($"Файл не существует по указанному пути: {filePath}");
+            var header = _converterService.ConvertToHeader(binary, 0);
 
-            var file = File.ReadAllBytes(filePath);
-            var header = file.ReadStruct<HeaderBuffer>(0);
-            if (header.Equals(default(HeaderBuffer)))
-            {
-                throw new Exception("Не удалось сконвертировать структуру Header");
-            }
-
+            if ((int)header.OffsetRanges > binary.Length)
+                throw new IndexOutOfRangeException("Длинна бинарника меньше offset для заголовка");
             var ipRanges = new uint[header.Records, 3];
-            Buffer.BlockCopy(file, (int)header.OffsetRanges, ipRanges, 0, header.Records * 12);
+            Buffer.BlockCopy(binary, (int)header.OffsetRanges, ipRanges, 0, header.Records * Constants.IpRangeSize);
 
-            var cities = new byte[header.Records, 96];
-            Buffer.BlockCopy(file, (int)header.OffsetLocations, cities, 0, header.Records * 96);
+            if ((int)header.OffsetLocations > binary.Length)
+                throw new IndexOutOfRangeException("Длинна бинарника меньше offset для городов");
+            var cities = new byte[header.Records, Constants.CitySize];
+            Buffer.BlockCopy(binary, (int)header.OffsetLocations, cities, 0, header.Records * Constants.CitySize);
 
+            if ((int)header.OffsetCities > binary.Length)
+                throw new IndexOutOfRangeException("Длинна бинарника меньше offset для городов");
             var locations = new int[header.Records];
-            Buffer.BlockCopy(file, (int)header.OffsetCities, locations, 0, header.Records * 4);
+            Buffer.BlockCopy(binary, (int)header.OffsetCities, locations, 0, header.Records * Constants.IndexSize);
 
             _db = new BinaryGeoBase(header, ipRanges, cities, locations);
 
             timer.Stop();
 
-            _db.LoadStatistic = new Models.BaseLoadStatistic();
-            _db.LoadStatistic.LoadDbFromDiskTime = timer.Elapsed;
+            _db.LoadStatistic = new BaseLoadStatistic
+            {
+                LoadDbFromDiskTime = timer.Elapsed
+            };
         }
     }
 }

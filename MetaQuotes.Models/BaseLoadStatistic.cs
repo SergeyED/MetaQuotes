@@ -12,9 +12,5 @@ namespace MetaQuotes.Models
         /// </summary>
         public TimeSpan LoadDbFromDiskTime { get; set; }
 
-        /// <summary>
-        /// Время конвертирования бинарных данных в объекты
-        /// </summary>
-        public TimeSpan ConvertBytesToObjectsTime { get; set; }
     }
 }

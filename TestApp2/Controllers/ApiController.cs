@@ -43,12 +43,9 @@ namespace MetaQuotes.WebApp.Controllers
         {
             var response = new
             {
-                LoadDbFromDiskTime = _repository.Db.LoadStatistic.LoadDbFromDiskTime.Milliseconds,
-                ConvertBytesToObjectsTime = _repository.Db.LoadStatistic.ConvertBytesToObjectsTime.Milliseconds
+                LoadDbFromDiskTime = _repository.Db.LoadStatistic.LoadDbFromDiskTime.Milliseconds
             };
             return Json(response);
         }
-
-
     }
 }

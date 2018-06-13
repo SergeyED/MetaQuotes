@@ -15,5 +15,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\MetaQuotes.Services\MetaQuotes.Services.csproj" />
+    <ProjectReference Include="..\MetaQuotes.Models\MetaQuotes.Models.csproj" />
   </ItemGroup>
 </Project>

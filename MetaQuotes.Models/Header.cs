@@ -1,9 +1,13 @@
-﻿using System.Runtime.InteropServices;
+﻿using System;
+using System.Runtime.InteropServices;
+using System.Xml.Serialization;
 
 namespace MetaQuotes.Models
 {
+    
     public class Header
     {
+      
         public Header(int version, string name, ulong timestamp, int records, uint offsetRanges, uint offsetCities, uint offsetLocations)
         {
             Version = version;

@@ -1,7 +1,7 @@
 ﻿namespace MetaQuotes.Models.Version2
 {
     public interface IBinaryGeoBase{
-        HeaderBuffer Header { get; }
+        Header Header { get; }
         uint[,] IpRanges { get; }
         byte[,] Cities { get; }
         int[] Locations { get; }
@@ -17,7 +17,7 @@
             
         }
 
-        public BinaryGeoBase(HeaderBuffer header, uint[,] ipRanges, byte[,] cities, int[] locations)
+        public BinaryGeoBase(Header header, uint[,] ipRanges, byte[,] cities, int[] locations)
         {
             Header = header;
             IpRanges = ipRanges;
@@ -25,7 +25,7 @@
             Locations = locations;
         }
 
-        public HeaderBuffer Header { get; }
+        public Header Header { get; }
         public uint[,] IpRanges { get; }
         public byte[,] Cities { get; }
         public int[] Locations { get; }
